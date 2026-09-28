@@ -129,7 +129,7 @@ elseif length(dV0) == 12
   dV(3) = Rang/(2*pi);
 
 % eliminate the noise floor of the 
-  amin = [600 350 350 350 350 350 350 600];
+  amin = [400 250 250 250 250 250 250 400];
   a = dV(4:11);
   dV(4:11) = max(0,a-amin);
 
