@@ -3,6 +3,8 @@
 %
 % Revision history:
 %      Date     Reason
+%      Sept 30 3036 Fixing up the cases so that elements cannot be below 0
+%      and fixing arithmetic for aV of length 2,4,6,8 only.
 % 
 % Purpose:  This script is used to optimize the line-position estimate and
 % estimate the current line position using the normalized amin vector.
@@ -17,12 +19,20 @@
 %--------------------------------------------------------------------------
 function x = get_line_position(aV)
 
-%aV = [400 250 250 250 250 250 250 400];
+%aV = [400 250 250 250 250 250 250 400]; % Normalized data coming in
 
-% can i use dV to get the raw sensor data?
-% might also be able to use show_serial_data to generate these values
+% Check that all the components are non-negative
+if all(aV(:) >= 0)
+    % find the sum of the sensor array and set bottom threshold at 1
+    s = max(1,sum(aV));
+else 
+    fprintf('ERROR in get_line_position.  The input vector ');
+    fprintf('aV cannot have negative components.\n');
+    x = [];
+    return;
+end
 
-s = max(1,sum(aV));
+
 
 switch numel(aV)
     case 2, x = (-50*aV(1) + 50*aV(2))/s;
@@ -31,34 +41,18 @@ switch numel(aV)
                     150*aV(5) + 250*aV(6))/s;
     case 8, x = (-350*aV(1) + -250*aV(2) + -150*aV(3) + -50*aV(4) + ...
                     50*aV(5) + 150*aV(6) + 250*aV(7) + 350*aV(8))/s;
-    otherwise, error('aV must be of length 2, 4, 6, or 8')
+    otherwise, fprintf('ERROR: aV must be of length 2, 4, 6, or 8\n');
+        x = [];
+        return;
 end
     
+end
 
 
-%x = (-350*aV(1) + -250*aV(2) + -150*aV(3) + -50*aV(4) + 50*aV(5) + 150*aV(6) + 250*aV(7) + 350*aV(8))/s;
-
-%so far this works all th time and is fully implemented for 8 sensor
-%values... how dod i get it to optimally only read 2,4,6, or 8 sensors and
-%from the center?
-
-% write code that calcs the line position and stores it in a vectoraV
-
-% check to see if aV is either a length of 2, 4, 6, or 8
-
-
-% if fewer than 8 values, then assume the line is centered aroudn the
-% middle
-
-
-% use class notes as a guideline
-
-
-% 
-% x =
-% 
-%    16.0296
-% 
-%   35 |  0.00  -0.00  |    0     0     0  1742  3386     0     0     0 |  5128    16 |  26.0 |  1.02   29.2
-% 
-% 
+% %make sure its the appropriate length
+% if ismember(numel(aV), [2, 4, 6, 8])
+%    fprintf('ERROR in get_line_position.  The input vector aV does
+%  not have an appropriate length.');
+%    x = 0;
+%    return;
+% end
